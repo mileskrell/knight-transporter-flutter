@@ -74,7 +74,7 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
               builder: (context) => AlertDialog(title: Text(bldgName)),
             );
           },
-          polygonId: PolygonId(bldgNum.toString()),
+          polygonId: PolygonId("building $bldgNum"),
           points: latLngs,
         ));
       });
@@ -135,7 +135,7 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
               builder: (context) => AlertDialog(title: Text(lotName)),
             );
           },
-          polygonId: PolygonId(lotID.toString()),
+          polygonId: PolygonId("parking lot $lotID"),
           points: latLngs,
         ));
       });
@@ -161,9 +161,10 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
           myLocationEnabled: true,
           onMapCreated: (controller) => this.controller = controller,
           onCameraMove: (cameraPosition) async {
+//            print("Printing ${visiblePolygons.length} polygons");
             final now = DateTime.now();
             if (now.difference(lastUpdateTime).inMilliseconds > 250) {
-              print("${now.second}: updating polygons!");
+//              print("${now.second}: updating polygons!");
               lastUpdateTime = now;
               final bounds = await controller?.getVisibleRegion();
               final visiblePolygons = allPolygons.where((polygon) {
