@@ -13,10 +13,8 @@ class GoogleMapsPage extends StatefulWidget {
 class _GoogleMapsPageState extends State<GoogleMapsPage> {
   GoogleMapController controller;
 
-  Set<Polygon> allBuildings = {};
-  Set<Polygon> visibleBuildings = {};
-  Set<Polygon> allLots = {};
-  Set<Polygon> visibleLots = {};
+  Set<Polygon> allPolygons = {};
+  Set<Polygon> visiblePolygons = {};
 
   DateTime lastUpdateTime;
 
@@ -83,8 +81,8 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
     });
 
     setState(() {
-      allBuildings = newPolygons;
-      visibleBuildings = newPolygons;
+      allPolygons.addAll(newPolygons);
+      visiblePolygons.addAll(newPolygons);
     });
   }
 
@@ -144,8 +142,8 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
     });
 
     setState(() {
-      allLots = newPolygons;
-      visibleLots = newPolygons;
+      allPolygons.addAll(newPolygons);
+      visiblePolygons.addAll(newPolygons);
     });
   }
 
@@ -168,19 +166,13 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
               print("${now.second}: updating polygons!");
               lastUpdateTime = now;
               final bounds = await controller?.getVisibleRegion();
-              final visibleBuildings = allBuildings.where((polygon) {
+              final visiblePolygons = allPolygons.where((polygon) {
                 return polygon.points.any((point) => bounds.contains(point));
               }).toSet();
-              final visibleLots = allLots.where((polygon) {
-                return polygon.points.any((point) => bounds.contains(point));
-              }).toSet();
-              setState(() {
-                this.visibleBuildings = visibleBuildings;
-                this.visibleLots = visibleLots;
-              });
+              setState(() => this.visiblePolygons = visiblePolygons);
             }
           },
-          polygons: visibleBuildings.union(visibleLots),
+          polygons: visiblePolygons,
           minMaxZoomPreference: MinMaxZoomPreference(10, 20),
           cameraTargetBounds: CameraTargetBounds(
             LatLngBounds(
