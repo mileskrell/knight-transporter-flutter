@@ -1,4 +1,4 @@
-package com.mileskrell.google_maps_test
+package edu.rutgers.knight_transporter_flutter
 
 import androidx.annotation.NonNull;
 import io.flutter.embedding.android.FlutterActivity
