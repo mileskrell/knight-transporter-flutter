@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_test/api_calls.dart';
+import 'package:knight_transporter_flutter/api_calls.dart';
 
 class GoogleMapsPage extends StatefulWidget {
   GoogleMapsPage({Key key, this.title}) : super(key: key);

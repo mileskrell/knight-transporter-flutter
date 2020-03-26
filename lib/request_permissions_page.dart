@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_test/google_maps_page.dart';
+import 'package:knight_transporter_flutter/google_maps_page.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class RequestPermissionsPage extends StatefulWidget {

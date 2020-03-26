@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_test/request_permissions_page.dart';
+import 'package:knight_transporter_flutter/request_permissions_page.dart';
 
 void main() => runApp(MyApp());
 

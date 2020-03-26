@@ -1,6 +1,6 @@
-# google_maps_test
+# knight_transporter_flutter
 
-Trying out Google Maps in Flutter
+A standalone Rutgers bus app (Flutter version)
 
 ## Getting Started
 
