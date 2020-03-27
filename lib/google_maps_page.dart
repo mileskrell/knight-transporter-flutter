@@ -21,8 +21,61 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
   @override
   void initState() {
     super.initState();
+    loadWalkways();
     loadBuildings();
-    loadParking();
+    loadParkingLots();
+  }
+
+  void loadWalkways() async {
+    final dynamic walkwaysJson = await getWalkways();
+
+    final newPolygons = Set<Polygon>();
+
+    final walkways = walkwaysJson["features"]
+        .where((dynamic it) => it["type"] == "Feature")
+        .toList() as List<dynamic>;
+
+    int walkwayPolygonId = 1; // this needs to be unique
+
+    walkways.forEach((dynamic walkway) {
+      final walkwayParts = <List<LatLng>>[];
+
+      // TODO: Are all the walkways MultiPolygons?
+      if (walkway["geometry"]["type"] == "MultiPolygon") {
+        walkway["geometry"]["coordinates"].forEach((dynamic polygon) {
+          polygon.forEach((dynamic points) {
+            walkwayParts.add((points as List)
+                .map<LatLng>(
+                    (dynamic it) => LatLng(it[1] as double, it[0] as double))
+                .toList());
+          });
+        });
+      } else {
+        walkway["geometry"]["coordinates"].forEach((dynamic points) {
+          final latLngPoints = points
+              .map<LatLng>(
+                  (dynamic it) => LatLng(it[1] as double, it[0] as double))
+              .toList() as List<LatLng>;
+          walkwayParts.add(latLngPoints);
+        });
+      }
+
+      walkwayParts.forEach((latLngs) {
+        newPolygons.add(Polygon(
+          strokeColor: Colors.transparent,
+          fillColor: Color(0x88964b00),
+          polygonId: PolygonId("walkway $walkwayPolygonId"),
+          points: latLngs,
+          zIndex: 0,
+        ));
+        walkwayPolygonId++;
+      });
+    });
+
+    setState(() {
+      allPolygons.addAll(newPolygons);
+      visiblePolygons.addAll(newPolygons);
+    });
   }
 
   void loadBuildings() async {
@@ -30,7 +83,7 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
 
     final newPolygons = Set<Polygon>();
 
-    final List<dynamic> buildings = buildingsJson["features"]
+    final buildings = buildingsJson["features"]
         .where((dynamic it) => it["type"] == "Feature")
         .toList() as List<dynamic>;
 
@@ -64,9 +117,8 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
 
       buildingParts.forEach((latLngs) {
         newPolygons.add(Polygon(
-          strokeWidth: 5,
+          strokeColor: Colors.transparent,
 //          fillColor: Colors.transparent,
-//          strokeColor: Colors.transparent,
           consumeTapEvents: true,
           onTap: () {
             showDialog<void>(
@@ -76,6 +128,7 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
           },
           polygonId: PolygonId("building $bldgNum"),
           points: latLngs,
+          zIndex: 1,
         ));
       });
     });
@@ -86,12 +139,12 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
     });
   }
 
-  void loadParking() async {
-    final dynamic parkingJson = await getParking();
+  void loadParkingLots() async {
+    final dynamic parkingJson = await getParkingLots();
 
     final newPolygons = Set<Polygon>();
 
-    final List<dynamic> parkingLots = parkingJson["features"]
+    final parkingLots = parkingJson["features"]
         .where((dynamic it) => it["type"] == "Feature")
         .toList() as List<dynamic>;
 
@@ -125,9 +178,8 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
 
       lotParts.forEach((latLngs) {
         newPolygons.add(Polygon(
-          strokeWidth: 5,
+          strokeColor: Colors.transparent,
           fillColor: Color(0x889E9E9E),
-          strokeColor: Color(0x889E9E9E),
           consumeTapEvents: true,
           onTap: () {
             showDialog<void>(
@@ -137,6 +189,7 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
           },
           polygonId: PolygonId("parking lot $lotID"),
           points: latLngs,
+          zIndex: 2,
         ));
       });
     });
@@ -152,14 +205,18 @@ class _GoogleMapsPageState extends State<GoogleMapsPage> {
     lastUpdateTime = DateTime.now();
     return Scaffold(
       appBar: AppBar(
-        title: Text("Rutgers Map Stuff"),
+        title: Text("Flutter + Google Maps"),
       ),
       body: Center(
         child: GoogleMap(
 //          mapType: MapType.satellite,
           buildingsEnabled: false,
           myLocationEnabled: true,
-          onMapCreated: (controller) => this.controller = controller,
+          onMapCreated: (controller) {
+            this.controller = controller;
+            // I can't hide the green pedestrian paths without also hiding roads
+            controller.setMapStyle('[{"featureType": "landscape.man_made","stylers": [{"visibility": "off"}]},{"featureType": "poi","stylers": [{"visibility": "off"}]}]');
+          },
           onCameraMove: (cameraPosition) async {
 //            print("Printing ${visiblePolygons.length} polygons");
             final now = DateTime.now();
